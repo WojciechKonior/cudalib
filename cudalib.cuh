@@ -24,13 +24,13 @@ namespace cu
     public:
         cuVar()
         {
-            cudaDeclare(i);
+            cudaDeclare();
             std::cout << i << " cint default constructor\n";
         }
         cuVar(T val)
         {
-            cudaAssign(i, val);
-            std::cout << i << " cint assign constructor\n";
+            cudaAssign(val);
+            std::cout << i << " " << val << " cint assign constructor\n";
         }
         cuVar(const cuVar<T> &val)
         {
@@ -39,40 +39,41 @@ namespace cu
         }
         ~cuVar()
         {
-            cudaClear(i);
+            cudaClear();
         }
 
-        void cudaClear(T *var)
+        void cudaClear()
         {
-            if(var != nullptr)
+            if(i != nullptr)
             {
-                // cudaFree(var);
-                // var = nullptr;
+                cudaFree(i);
+                i = nullptr;
             }
         }
 
-        void cudaDeclare(T *var)
+        void cudaDeclare()
         {
-            cudaClear(var);
-            cudaMalloc(&var, sizeof(T));
+            cudaClear();
+            cudaMalloc(&i, sizeof(T));
         }
 
-        void cudaAssign(T *ptr, T val)
+        void cudaAssign(T val)
         {
-            cudaDeclare(ptr);
-            cudaMemcpy(ptr, &val, sizeof(T), cudaMemcpyHostToDevice);
+            cudaDeclare();
+            cudaMemcpy(i, &val, sizeof(T), cudaMemcpyHostToDevice);
+            // cout << "cudaAssign : " << i << " " << val << endl;
         }
 
         void cudaReference(const cuVar<T> &val)
         {
-            cudaClear(i);
+            cudaClear();
             i = val.i;
         }
 
         void cudaCopy(const cuVar<T> &val)
         {
-            cout << "cudaCopy: i = " << get() << ", val = " << val.get() << endl;
-            cudaDeclare(i);
+            // cout << "cudaCopy: i = " << get() << ", val = " << val.get() << endl;
+            cudaDeclare();
             cudaCopyVariableOnGPU<T><<<1,1>>>(i, val.i);
         }
 
@@ -80,8 +81,12 @@ namespace cu
         {
             T host_var;
             cudaMemcpy(&host_var, i, sizeof(T), cudaMemcpyDeviceToHost);
+            // cout << "cudaGet : " << i << " " << host_var << endl;
             return host_var;
         }
+
+        operator T() const { return get(); }
+        // friend ostream& operator<<(ostream& os, const cuVar<T>& gpu_val);
     };
 
     using int8 = cuVar<char>;
@@ -95,6 +100,13 @@ namespace cu
     using float32 = cuVar<float>;
     using float64 = cuVar<double>;
     using float128 = cuVar<long double>;
+}
+
+template<typename T>
+ostream& operator<<(ostream& os, const cu::cuVar<T>& gpu_val)
+{
+    os << gpu_val.get();
+    return os;
 }
 
 #endif
