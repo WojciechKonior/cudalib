@@ -9,18 +9,22 @@ namespace cuda
     namespace gpu
     {
         template <typename T>
-        __global__ void cudaCopyVariableOnGPU(int *i_dest, int *i_src)
-        {
-            *i_dest = *i_src;
-        }
-
-        template <typename T>
         class scalar : public cudaVariable<T>
         {
         public:
             scalar() { this->cudaDeclare(); }
-            scalar(T val) { cudaAssign(val); }
-            scalar(const scalar<T> &val) { cudaCopy(val); }
+            scalar(T val) 
+            { 
+                this->cudaDeclare();
+                cudaMemcpy(this->_data, &val, sizeof(T), cudaMemcpyHostToDevice);
+            }
+
+            scalar(const scalar<T> &val) 
+            { 
+                this->cudaDeclare();
+                cudaCopyVariableInGPU<T><<<1, 1>>>(this->_data, val._data);
+            }
+
             ~scalar() { this->cudaClear(); }
 
             T get() const
@@ -31,19 +35,6 @@ namespace cuda
             }
 
             operator T() const { return get(); }
-
-            void cudaAssign(T val)
-            {
-                this->cudaDeclare();
-                cudaMemcpy(this->_data, &val, sizeof(T), cudaMemcpyHostToDevice);
-            }
-
-            void cudaCopy(const scalar<T> &val)
-            {
-                this->cudaDeclare();
-                cudaCopyVariableOnGPU<T><<<1, 1>>>(this->_data, val._data);
-            }
-
         };
 
         typedef scalar<char> int8;
