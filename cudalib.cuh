@@ -38,18 +38,13 @@ namespace cuda
         }
 
         template <typename T>
-        class scalar
+        class cudaVariable
         {
         protected:
             T *data;
 
         public:
-            scalar() { cudaDeclare(); }
-            scalar(T val) { cudaAssign(val); }
-            scalar(const scalar<T> &val) { cudaCopy(val); }
-            ~scalar() { cudaClear(); }
-
-            void cudaClear()
+            virtual void cudaClear()
             {
                 if (data != nullptr)
                 {
@@ -58,32 +53,43 @@ namespace cuda
                 }
             }
 
-            void cudaDeclare()
+            virtual void cudaDeclare(size_t size = 1)
             {
                 cudaClear();
-                cudaMalloc(&data, sizeof(T));
+                cudaMalloc(&this->data, size*sizeof(T));
             }
+        };
 
-            void cudaAssign(T val)
-            {
-                cudaDeclare();
-                cudaMemcpy(data, &val, sizeof(T), cudaMemcpyHostToDevice);
-            }
-
-            void cudaCopy(const scalar<T> &val)
-            {
-                cudaDeclare();
-                cudaCopyVariableOnGPU<T><<<1, 1>>>(data, val.data);
-            }
+        template <typename T>
+        class scalar : public cudaVariable<T>
+        {
+        public:
+            scalar() { this->cudaDeclare(); }
+            scalar(T val) { cudaAssign(val); }
+            scalar(const scalar<T> &val) { cudaCopy(val); }
+            ~scalar() { this->cudaClear(); }
 
             T get() const
             {
                 T host_var;
-                cudaMemcpy(&host_var, data, sizeof(T), cudaMemcpyDeviceToHost);
+                cudaMemcpy(&host_var, this->data, sizeof(T), cudaMemcpyDeviceToHost);
                 return host_var;
             }
 
             operator T() const { return get(); }
+
+            void cudaAssign(T val)
+            {
+                this->cudaDeclare();
+                cudaMemcpy(this->data, &val, sizeof(T), cudaMemcpyHostToDevice);
+            }
+
+            void cudaCopy(const scalar<T> &val)
+            {
+                this->cudaDeclare();
+                cudaCopyVariableOnGPU<T><<<1, 1>>>(this->data, val.data);
+            }
+
         };
 
         typedef scalar<char> int8;
@@ -99,55 +105,40 @@ namespace cuda
         typedef scalar<long double> float128;
 
         template <typename T>
-        class vector
+        class vector : public cudaVariable<T>
         {
         protected:
-            T *data;
             size_t size;
 
         public:
             vector() { size = 0; }
             vector(std::vector<T>& vec) { cudaAssign(vec); }
             vector(const cuda::gpu::vector<T> &cuda_vec) { cudaCopy(cuda_vec); }
-            ~vector() { cudaClear(); }
+            ~vector() { this->cudaClear(); }
 
-            void cudaClear()
+            std::vector<T> get() const
             {
-                if (data != nullptr)
-                {
-                    cudaFree(data);
-                    data = nullptr;
-                }
+                std::vector<T> host_vec(size);
+                cudaMemcpy(&host_vec[0], this->data, size*sizeof(T), cudaMemcpyDeviceToHost);
+                return host_vec;
             }
-
-            void cudaDeclare()
-            {
-                cudaClear();
-                cudaMalloc(&data, size*sizeof(T));
-            }
+            
+            operator std::vector<T>() const { return get(); }
 
             void cudaAssign(std::vector<T>& vec)
             {
-                cudaDeclare();
-                cudaMemcpy(data, &vec[0], size*sizeof(T), cudaMemcpyHostToDevice);
+                this->cudaDeclare();
+                cudaMemcpy(this->data, &vec[0], size*sizeof(T), cudaMemcpyHostToDevice);
             }
 
             void cudaCopy(const cuda::gpu::vector<T> &cuda_vec)
             {
-                cudaDeclare();
+                this->cudaDeclare();
                 size_t NUM_THR = size;
                 size_t NUM_BLOCKS = 1;
-                cudaCopyVectorOnGPU<T><<<NUM_BLOCKS, NUM_THR>>>(data, cuda_vec.data, size);
+                cudaCopyVectorOnGPU<T><<<NUM_BLOCKS, NUM_THR>>>(this->data, cuda_vec.data, size);
             }
 
-            T get() const
-            {
-                std::vector<T> host_vec(size);
-                cudaMemcpy(&host_vec[0], data, size*sizeof(T), cudaMemcpyDeviceToHost);
-                return host_vec;
-            }
-
-            operator T() const { return get(); }
         };
     }
 }
