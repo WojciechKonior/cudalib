@@ -31,6 +31,13 @@ namespace cuda
         }
 
         template <typename T>
+        __global__ void cudaCopyVectorOnGPU(int *vec_dest, int *vec_src, size_t n)
+        {
+            size_t tid = blockDim.x*blockIdx.x + threadIdx.x;
+            if(tid<n) vec_dest[tid] = vec_src[tid];
+        }
+
+        template <typename T>
         class cuVar
         {
         protected:
@@ -128,14 +135,16 @@ namespace cuda
             void cudaCopy(const cuda::gpu::vector<T> &cuda_vec)
             {
                 cudaDeclare();
-                // cudaCopyVariableOnGPU<T><<<1, 1>>>(data, cuda_vec.data);
+                size_t NUM_THR = size;
+                size_t NUM_BLOCKS = 1;
+                cudaCopyVectorOnGPU<T><<<NUM_BLOCKS, NUM_THR>>>(data, cuda_vec.data, size);
             }
 
             T get() const
             {
-                T host_var;
-                // cudaMemcpy(&host_var, data, size*sizeof(T), cudaMemcpyDeviceToHost);
-                return host_var;
+                std::vector<T> host_vec(size);
+                cudaMemcpy(&host_vec[0], data, size*sizeof(T), cudaMemcpyDeviceToHost);
+                return host_vec;
             }
 
             operator T() const { return get(); }
