@@ -1,36 +1,47 @@
 #include <iostream>
 #include "cudascalar.cuh"
 #include "cudavector.cuh"
+#include <gtest/gtest.h>
 
-using namespace std;
+// using namespace std;
 
 using namespace cuda;
-int main()
+
+TEST(first_test, f_test)
 {
+    int a = 20;
+    int b = 20;
+    EXPECT_EQ(a, b);
+}
 
-    // assignTest();
-    // copy test
-    // output stream test
-    // retrieving _data from gpu test
+int main(int argc, char **argv)
+{
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 
-    int32 i = 10;
-    gpu::int32 a = i;
-    gpu::int32 b = 20;
-    gpu::int32 c = a;
-    gpu::int32 &e = a;
+    // // assignTest();
+    // // copy test
+    // // output stream test
+    // // retrieving _data from gpu test
 
-    std::vector<int32> v = {1, 2, 3, 4};
-    gpu::vector<int32> vec8({1, 2, 3, 4});
-    gpu::vector<int32> vec9 = {3, 4, 3, 2};
-    gpu::vector<int32> vec(v);
-    gpu::vector<int32> vec2(vec);
-    gpu::vector<int32> vec3 = v;
-    gpu::vector<int32> vec4 = vec3;
+    // int32 i = 10;
+    // gpu::int32 a = i;
+    // gpu::int32 b = 20;
+    // gpu::int32 c = a;
+    // gpu::int32 &e = a;
 
-    std::vector<int32> vec5 = vec4;
-    gpu::vector<int32> vec6 = vec5;
-    int d = b;
-    cout << a << " " << b << " " << c << " " << d << " " << e << endl;
-    cout << vec << " "<<vec2 << " " << vec3 << " " << vec4<< " " << vec6 << vec5<< endl;
-    return 0;
+    // std::vector<int32> v = {1, 2, 3, 4};
+    // gpu::vector<int32> vec8({1, 2, 3, 4});
+    // gpu::vector<int32> vec9 = {3, 4, 3, 2};
+    // gpu::vector<int32> vec(v);
+    // gpu::vector<int32> vec2(vec);
+    // gpu::vector<int32> vec3 = v;
+    // gpu::vector<int32> vec4 = vec3;
+
+    // std::vector<int32> vec5 = vec4;
+    // gpu::vector<int32> vec6 = vec5;
+    // int d = b;
+    // cout << a << " " << b << " " << c << " " << d << " " << e << endl;
+    // cout << vec << " "<<vec2 << " " << vec3 << " " << vec4<< " " << vec6 << vec5<< endl;
+    // return 0;
 }
