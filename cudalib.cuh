@@ -162,7 +162,11 @@ ostream &operator<<(ostream &os, const cuda::gpu::cuVar<T> &gpu_val)
 template <typename T>
 ostream &operator<<(ostream &os, const cuda::gpu::vector<T> &gpu_val)
 {
-    // os << gpu_val.get();
+    std::vector<T> result = gpu_val.get();
+    os << "[";
+    for(auto& r : result)
+        os << r << " ";
+    os << "]";
     return os;
 }
 
