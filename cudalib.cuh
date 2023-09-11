@@ -38,16 +38,16 @@ namespace cuda
         }
 
         template <typename T>
-        class cuVar
+        class scalar
         {
         protected:
             T *data;
 
         public:
-            cuVar() { cudaDeclare(); }
-            cuVar(T val) { cudaAssign(val); }
-            cuVar(const cuVar<T> &val) { cudaCopy(val); }
-            ~cuVar() { cudaClear(); }
+            scalar() { cudaDeclare(); }
+            scalar(T val) { cudaAssign(val); }
+            scalar(const scalar<T> &val) { cudaCopy(val); }
+            ~scalar() { cudaClear(); }
 
             void cudaClear()
             {
@@ -70,7 +70,7 @@ namespace cuda
                 cudaMemcpy(data, &val, sizeof(T), cudaMemcpyHostToDevice);
             }
 
-            void cudaCopy(const cuVar<T> &val)
+            void cudaCopy(const scalar<T> &val)
             {
                 cudaDeclare();
                 cudaCopyVariableOnGPU<T><<<1, 1>>>(data, val.data);
@@ -86,17 +86,17 @@ namespace cuda
             operator T() const { return get(); }
         };
 
-        typedef cuVar<char> int8;
-        typedef cuVar<short> int16;
-        typedef cuVar<int> int32;
-        typedef cuVar<long long> int64;
-        typedef cuVar<unsigned char> uint8;
-        typedef cuVar<unsigned short> uint16;
-        typedef cuVar<unsigned int> uint32;
-        typedef cuVar<unsigned long long> uint64;
-        typedef cuVar<float> float32;
-        typedef cuVar<double> float64;
-        typedef cuVar<long double> float128;
+        typedef scalar<char> int8;
+        typedef scalar<short> int16;
+        typedef scalar<int> int32;
+        typedef scalar<long long> int64;
+        typedef scalar<unsigned char> uint8;
+        typedef scalar<unsigned short> uint16;
+        typedef scalar<unsigned int> uint32;
+        typedef scalar<unsigned long long> uint64;
+        typedef scalar<float> float32;
+        typedef scalar<double> float64;
+        typedef scalar<long double> float128;
 
         template <typename T>
         class vector
@@ -153,7 +153,7 @@ namespace cuda
 }
 
 template <typename T>
-ostream &operator<<(ostream &os, const cuda::gpu::cuVar<T> &gpu_val)
+ostream &operator<<(ostream &os, const cuda::gpu::scalar<T> &gpu_val)
 {
     os << gpu_val.get();
     return os;
