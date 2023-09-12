@@ -9,9 +9,9 @@ using namespace cuda;
 
 TEST(first_test, f_test)
 {
-    int a = 20;
-    int b = 20;
-    EXPECT_EQ(a, b);
+    gpu::int32 a;
+    EXPECT_EQ(a.get(), 0);
+    EXPECT_EQ(a.getptr(), nullptr);
 }
 
 int main(int argc, char **argv)
@@ -24,6 +24,7 @@ int main(int argc, char **argv)
     // // output stream test
     // // retrieving _data from gpu test
 
+    // gpu::int32
     // int32 i = 10;
     // gpu::int32 a = i;
     // gpu::int32 b = 20;
@@ -41,7 +42,7 @@ int main(int argc, char **argv)
     // std::vector<int32> vec5 = vec4;
     // gpu::vector<int32> vec6 = vec5;
     // int d = b;
-    // cout << a << " " << b << " " << c << " " << d << " " << e << endl;
-    // cout << vec << " "<<vec2 << " " << vec3 << " " << vec4<< " " << vec6 << vec5<< endl;
+    // std::cout << a << " " << b << " " << c << " " << d << " " << e << std::endl;
+    // std::cout << vec << " "<<vec2 << " " << vec3 << " " << vec4<< " " << vec6 << vec5<< std::endl;
     // return 0;
 }

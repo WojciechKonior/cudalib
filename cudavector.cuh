@@ -17,7 +17,7 @@ namespace cuda
             size_t _size;
 
         public:
-            vector() { _size = 0; }
+            vector() { _size = 0; this->_data = nullptr; }
             vector(std::vector<T>& vec) 
             { 
                 _size = vec.size();

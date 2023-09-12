@@ -12,7 +12,7 @@ namespace cuda
         class scalar : public cudaVariable<T>
         {
         public:
-            scalar() { this->cudaDeclare(); }
+            scalar() { this->_data = nullptr; }
             scalar(T val) 
             { 
                 this->cudaDeclare();
@@ -29,10 +29,13 @@ namespace cuda
 
             T get() const
             {
-                T host_var;
-                cudaMemcpy(&host_var, this->_data, sizeof(T), cudaMemcpyDeviceToHost);
+                T host_var = 0;
+                if(this->_data != nullptr)
+                    cudaMemcpy(&host_var, this->_data, sizeof(T), cudaMemcpyDeviceToHost);
                 return host_var;
             }
+
+            T* getptr() const { return this->_data; }
 
             operator T() const { return get(); }
         };
