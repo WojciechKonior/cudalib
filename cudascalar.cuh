@@ -20,7 +20,7 @@ namespace cuda
             }
 
             scalar(const scalar<T> &val) 
-            { 
+            {
                 this->cudaDeclare();
                 cudaCopyVariableInGPU<T><<<1, 1>>>(this->_data, val._data);
             }
@@ -50,7 +50,6 @@ namespace cuda
         typedef scalar<unsigned long long> uint64;
         typedef scalar<float> float32;
         typedef scalar<double> float64;
-        typedef scalar<long double> float128;
     }
 }
 

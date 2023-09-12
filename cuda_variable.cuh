@@ -14,12 +14,23 @@ typedef unsigned int uint32;
 typedef unsigned long long uint64;
 typedef float float32;
 typedef double float64;
-typedef long double float128;
 
 namespace cuda
 {
     namespace gpu
     {
+        template <typename T>
+        __global__ void cudaCopyVariableInGPU(T *dest, T *src, size_t n = 1)
+        {
+            if(n == 1)
+                *dest = *src;
+            else
+            {
+                size_t tid = blockDim.x*blockIdx.x + threadIdx.x;
+                if(tid<n) dest[tid] = src[tid];
+            }
+        }
+
         template <typename T>
         class cudaVariable
         {

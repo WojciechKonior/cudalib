@@ -51,6 +51,7 @@ namespace cuda
             operator std::vector<T>() const { return get(); }
 
             size_t size(){ return this->_size; }
+            T* getptr() { return this->_data; }
 
             // void push(T value, size_t index = size + 1);
             // void pop
