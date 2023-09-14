@@ -11,7 +11,7 @@ namespace cuda
     namespace gpu
     {
         template <typename T>
-        class vector : public cudaVariable<T>
+        class vector : public var<T>
         {
         protected:
             size_t _size;
@@ -19,20 +19,20 @@ namespace cuda
         public:
             vector() { _size = 0; this->_data = nullptr; }
             vector(std::vector<T>& vec) 
-            { 
+            {
                 _size = vec.size();
                 this->cudaDeclare(_size);
                 cudaMemcpy(this->_data, &vec[0], _size*sizeof(T), cudaMemcpyHostToDevice);
             }
             vector(const std::initializer_list<T>& list) 
-            { 
+            {
                 std::vector<T> vec = list; 
                 _size = vec.size();
                 this->cudaDeclare(_size);
                 cudaMemcpy(this->_data, &vec[0], _size*sizeof(T), cudaMemcpyHostToDevice);
             }
             vector(cuda::gpu::vector<T> &cuda_vec) 
-            { 
+            {
                 _size = cuda_vec.size();
                 this->cudaDeclare(_size);
                 size_t NUM_THR = _size;
@@ -67,7 +67,7 @@ namespace cuda
 }
 
 template <typename T>
-std::ostream &operator<<(std::ostream &os, const cuda::gpu::vector<T> &gpu_val)
+std::ostream &operator<<(std::ostream &os, cuda::gpu::vector<T> gpu_val)
 {
     std::vector<T> result = gpu_val.get();
     os << "[";

@@ -49,6 +49,9 @@ public:
         int cpu_var = 30;
         T c = cpu_var;
         EXPECT_EQ(c.get(), T(cpu_var));
+
+        c = 40;
+        EXPECT_EQ(c.get(), 40);
     }
 };
 
@@ -85,6 +88,9 @@ public:
         T e(30);
         T &f = e;
         EXPECT_EQ(f.get(), 30);
+
+        e = c;
+        EXPECT_EQ(e.get(), 20);
     }
 };
 

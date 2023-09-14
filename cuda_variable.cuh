@@ -32,12 +32,17 @@ namespace cuda
         }
 
         template <typename T>
-        class cudaVariable
+        class var
         {
         protected:
             T *_data;
 
         public:
+            var()
+            {
+                _data = nullptr;
+            }
+            
             virtual void cudaClear()
             {
                 if (_data != nullptr)

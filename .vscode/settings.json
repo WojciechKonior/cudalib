@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "\"*.cu\"": "\"cpp\"",
+        "\"*.cuh\"": "\"cpp\"",
+        "iostream": "cpp"
+    },
+    "workbench.colorTheme": "Visual Studio Dark - C++"
+}

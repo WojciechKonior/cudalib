@@ -40,7 +40,22 @@ class testVectorAssignment
 public:
     testVectorAssignment()
     {
+        std::vector<T> stdVec = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
 
+        gpu::vector<T> gpuVec1(stdVec);
+        EXPECT_EQ(stdVec, gpuVec1.get());
+
+        gpu::vector<T> gpuVec2 = stdVec;
+        EXPECT_EQ(stdVec, gpuVec2.get());
+
+        gpu::vector<T> gpuVec3({1, 2, 3, 4, 5, 6, 7, 8, 9, 0});
+        EXPECT_EQ(stdVec, gpuVec3.get());
+
+        gpu::vector<T> gpuVec4 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
+        EXPECT_EQ(stdVec, gpuVec4.get());
+
+        // gpuVec4 = stdVec;
+        // EXPECT_EQ(stdVec, gpuVec4.get());
     }
 };
 

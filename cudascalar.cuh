@@ -9,19 +9,26 @@ namespace cuda
     namespace gpu
     {
         template <typename T>
-        class scalar : public cudaVariable<T>
+        class scalar : public var<T>
         {
         public:
             scalar() { this->_data = nullptr; }
             scalar(T val) 
-            { 
+            {
                 this->cudaDeclare();
                 cudaMemcpy(this->_data, &val, sizeof(T), cudaMemcpyHostToDevice);
             }
 
+            scalar& operator=(const T& val)
+            {
+                if(this->_data == nullptr) this->cudaDeclare();
+                cudaMemcpy(this->_data, &val, sizeof(T), cudaMemcpyHostToDevice);
+                return *this;
+            }
+
             scalar(const scalar<T> &val) 
             {
-                this->cudaDeclare();
+                if(this->_data == nullptr) this->cudaDeclare();
                 cudaCopyVariableInGPU<T><<<1, 1>>>(this->_data, val._data);
             }
 
@@ -31,13 +38,13 @@ namespace cuda
             {
                 T host_var = 0;
                 if(this->_data != nullptr)
-                    cudaMemcpy(&host_var, this->_data, sizeof(T), cudaMemcpyDeviceToHost);
+                    cudaMemcpy(&host_var, getptr(), sizeof(T), cudaMemcpyDeviceToHost);
                 return host_var;
             }
 
             T* getptr() const { return this->_data; }
 
-            operator T() const { return get(); }
+            operator T() const { return this->get(); }
         };
 
         typedef scalar<char> int8;
@@ -54,7 +61,7 @@ namespace cuda
 }
 
 template <typename T>
-std::ostream &operator<<(std::ostream &os, const cuda::gpu::scalar<T> &gpu_val)
+std::ostream &operator<<(std::ostream &os, const cuda::gpu::scalar<T>& gpu_val)
 {
     os << gpu_val.get();
     return os;
