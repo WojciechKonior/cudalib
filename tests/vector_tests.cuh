@@ -54,8 +54,14 @@ public:
         gpu::vector<T> gpuVec4 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
         EXPECT_EQ(stdVec, gpuVec4.get());
 
-        // gpuVec4 = stdVec;
-        // EXPECT_EQ(stdVec, gpuVec4.get());
+        stdVec = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2};
+        gpuVec4 = stdVec;
+        EXPECT_EQ(stdVec, gpuVec4.get());
+
+        gpuVec4 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4};
+        stdVec.push_back(3);
+        stdVec.push_back(4);
+        EXPECT_EQ(stdVec, gpuVec4.get());
     }
 };
 
@@ -81,7 +87,21 @@ class testVectorCopying
 public:
     testVectorCopying()
     {
+        std::vector<T> sample = {7, 8, 4, 3, 2};
+        
+        gpu::vector<T> a(sample);
+        EXPECT_EQ(sample, a.get());
 
+        gpu::vector<T> b(a);
+        EXPECT_EQ(sample, b.get());
+
+        gpu::vector<T> c = b;
+        EXPECT_EQ(sample, c.get());
+
+        sample.push_back(9);
+        a = sample;
+        b = a;
+        EXPECT_EQ(sample, b.get());
     }
 };
 
@@ -107,7 +127,14 @@ class testVectorConverting
 public:
     testVectorConverting()
     {
+        std::vector<T> sample = {2, 3, 1, 5, 3};
+        gpu::vector<T> to_gpu(sample);
 
+        std::vector<T> back_from_gpu_1 = to_gpu;
+        std::vector<T> back_from_gpu_2(to_gpu);
+
+        EXPECT_EQ(sample, back_from_gpu_1);
+        EXPECT_EQ(sample, back_from_gpu_2);
     }
 };
 
@@ -126,13 +153,5 @@ TEST(cuda_vector_test, vectors_converting)
     testVectorConverting<float32>();
     testVectorConverting<float64>();
 }
-
-    // std::vector<int32> v = {1, 2, 3, 4};
-    // gpu::vector<int32> vec8({1, 2, 3, 4});
-    // gpu::vector<int32> vec9 = {3, 4, 3, 2};
-    // gpu::vector<int32> vec(v);
-    // gpu::vector<int32> vec2(vec);
-    // gpu::vector<int32> vec3 = v;
-    // gpu::vector<int32> vec4 = vec3;
 
 #endif

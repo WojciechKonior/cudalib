@@ -17,7 +17,7 @@ namespace cuda
             size_t _size;
 
         public:
-            vector() { _size = 0; this->_data = nullptr; }
+            vector() { _size = 0; }
             vector(std::vector<T>& vec) 
             {
                 _size = vec.size();
@@ -39,12 +39,41 @@ namespace cuda
                 size_t NUM_BLOCKS = 1;
                 cudaCopyVariableInGPU<T><<<NUM_BLOCKS, NUM_THR>>>(this->_data, cuda_vec._data, _size);
             }
+
+            vector<T>& operator=(const std::vector<T>& vec)
+            {
+                _size = vec.size();
+                this->cudaDeclare(_size);
+                cudaMemcpy(this->_data, &vec[0], _size*sizeof(T), cudaMemcpyHostToDevice);
+                return *this;
+            }
+
+            vector<T>& operator=(const std::initializer_list<T>& list) 
+            {
+                std::vector<T> vec = list; 
+                _size = vec.size();
+                this->cudaDeclare(_size);
+                cudaMemcpy(this->_data, &vec[0], _size*sizeof(T), cudaMemcpyHostToDevice);
+                return *this;
+            }
+
+            vector<T>& operator=(vector<T> &cuda_vec) 
+            {
+                _size = cuda_vec.size();
+                this->cudaDeclare(_size);
+                size_t NUM_THR = _size;
+                size_t NUM_BLOCKS = 1;
+                cudaCopyVariableInGPU<T><<<NUM_BLOCKS, NUM_THR>>>(this->_data, cuda_vec._data, _size);
+                return *this;
+            }
+
             ~vector() { this->cudaClear(); }
 
             std::vector<T> get() const
             {
                 std::vector<T> host_vec(_size);
-                cudaMemcpy(&host_vec[0], this->_data, _size*sizeof(T), cudaMemcpyDeviceToHost);
+                if(this->_data != nullptr)
+                    cudaMemcpy(&host_vec[0], this->_data, _size*sizeof(T), cudaMemcpyDeviceToHost);
                 return host_vec;
             }
             
@@ -67,7 +96,7 @@ namespace cuda
 }
 
 template <typename T>
-std::ostream &operator<<(std::ostream &os, cuda::gpu::vector<T> gpu_val)
+std::ostream &operator<<(std::ostream &os, const cuda::gpu::vector<T>& gpu_val)
 {
     std::vector<T> result = gpu_val.get();
     os << "[";

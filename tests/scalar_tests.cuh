@@ -118,8 +118,12 @@ public:
     {
         _T a = 10;
         T b = a;
+
         _T c = a;
+        _T d(a);
+
         EXPECT_EQ(c, a);
+        EXPECT_EQ(d, a);
     }
 };
 

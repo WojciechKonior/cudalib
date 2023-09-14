@@ -28,8 +28,15 @@ namespace cuda
 
             scalar(const scalar<T> &val) 
             {
+                this->cudaDeclare();
+                cudaCopyVariableInGPU<T><<<1, 1>>>(this->_data, val._data);
+            }
+
+            scalar& operator=(const scalar<T> &val)
+            {
                 if(this->_data == nullptr) this->cudaDeclare();
                 cudaCopyVariableInGPU<T><<<1, 1>>>(this->_data, val._data);
+                return *this;
             }
 
             ~scalar() { this->cudaClear(); }
